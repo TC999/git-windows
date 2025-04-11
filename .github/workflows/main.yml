@@ -1,6 +1,6 @@
 name: CI
 
-on: [push, pull_request]
+on: [push, pull_request,workflow_dispatch]
 
 env:
   DEVELOPER: 1
@@ -164,7 +164,6 @@ jobs:
   vs-build:
     name: win+VS build
     needs: ci-config
-    if: github.event.repository.owner.login == 'git-for-windows' && needs.ci-config.outputs.enabled == 'yes'
     env:
       NO_PERL: 1
       GIT_CONFIG_PARAMETERS: "'user.name=CI' 'user.email=ci@git'"
