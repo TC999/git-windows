@@ -2612,7 +2612,7 @@ static void print_stat_summary_inserts_deletes(struct diff_options *options,
 	}
 
 	strbuf_addf(&sb,
-		    (files == 1) ? " %d file changed" : " %d files changed",
+		    (files == 1) ? _(" %d file changed") : _(" %d files changed"),
 		    files);
 
 	/*
@@ -2625,13 +2625,13 @@ static void print_stat_summary_inserts_deletes(struct diff_options *options,
 	 */
 	if (insertions || deletions == 0) {
 		strbuf_addf(&sb,
-			    (insertions == 1) ? ", %d insertion(+)" : ", %d insertions(+)",
+			    (insertions == 1) ? _(", %d insertion(+)") : _(", %d insertions(+)"),
 			    insertions);
 	}
 
 	if (deletions || insertions == 0) {
 		strbuf_addf(&sb,
-			    (deletions == 1) ? ", %d deletion(-)" : ", %d deletions(-)",
+			    (deletions == 1) ? _(", %d deletion(-)") : _(", %d deletions(-)"),
 			    deletions);
 	}
 	strbuf_addch(&sb, '\n');
@@ -3670,7 +3670,7 @@ static void builtin_diff(const char *name_a,
 			}
 			emit_diff_symbol(o, DIFF_SYMBOL_HEADER,
 					 header.buf, header.len, 0);
-			strbuf_addf(&sb, "%sBinary files %s and %s differ\n",
+			strbuf_addf(&sb, _("%sBinary files %s and %s differ\n"),
 				    diff_line_prefix(o), lbl[0], lbl[1]);
 			emit_diff_symbol(o, DIFF_SYMBOL_BINARY_FILES,
 					 sb.buf, sb.len, 0);
@@ -3680,7 +3680,7 @@ static void builtin_diff(const char *name_a,
 		}
 		if (fill_mmfile(o->repo, &mf1, one) < 0 ||
 		    fill_mmfile(o->repo, &mf2, two) < 0)
-			die("unable to read files to diff");
+			die(_("unable to read files to diff"));
 		/* Quite common confusing case */
 		if (mf1.size == mf2.size &&
 		    !memcmp(mf1.ptr, mf2.ptr, mf1.size)) {
@@ -3694,7 +3694,7 @@ static void builtin_diff(const char *name_a,
 		if (o->flags.binary)
 			emit_binary_diff(o, &mf1, &mf2);
 		else {
-			strbuf_addf(&sb, "%sBinary files %s and %s differ\n",
+			strbuf_addf(&sb, _("%sBinary files %s and %s differ\n"),
 				    diff_line_prefix(o), lbl[0], lbl[1]);
 			emit_diff_symbol(o, DIFF_SYMBOL_BINARY_FILES,
 					 sb.buf, sb.len, 0);
@@ -3761,7 +3761,7 @@ static void builtin_diff(const char *name_a,
 			init_diff_words_data(&ecbdata, o, one, two);
 		if (xdi_diff_outf(&mf1, &mf2, NULL, fn_out_consume,
 				  &ecbdata, &xpp, &xecfg))
-			die("unable to generate diff for %s", one->path);
+			die(_("unable to generate diff for %s"), one->path);
 		if (o->word_diff)
 			free_diff_words_data(&ecbdata);
 		if (textconv_one)
@@ -3877,7 +3877,7 @@ static void builtin_diffstat(const char *name_a, const char *name_b,
 		xecfg.flags = XDL_EMIT_NO_HUNK_HDR;
 		if (xdi_diff_outf(&mf1, &mf2, NULL,
 				  diffstat_consume, diffstat, &xpp, &xecfg))
-			die("unable to generate diffstat for %s", one->path);
+			die(_("unable to generate diffstat for %s"), one->path);
 
 		if (DIFF_FILE_VALID(one) && DIFF_FILE_VALID(two)) {
 			struct diffstat_file *file =
@@ -3926,7 +3926,7 @@ static void builtin_checkdiff(const char *name_a, const char *name_b,
 
 	if (fill_mmfile(o->repo, &mf1, one) < 0 ||
 	    fill_mmfile(o->repo, &mf2, two) < 0)
-		die("unable to read files to diff");
+		die(_("unable to read files to diff"));
 
 	/*
 	 * All the other codepaths check both sides, but not checking
@@ -3948,7 +3948,7 @@ static void builtin_checkdiff(const char *name_a, const char *name_b,
 		if (xdi_diff_outf(&mf1, &mf2, checkdiff_consume_hunk,
 				  checkdiff_consume, &data,
 				  &xpp, &xecfg))
-			die("unable to generate checkdiff for %s", one->path);
+			die(_("unable to generate checkdiff for %s"), one->path);
 
 		if (data.ws_rule & WS_BLANK_AT_EOF) {
 			struct emit_callback ecbdata;
@@ -4133,7 +4133,7 @@ int diff_populate_filespec(struct repository *r,
 		conv_flags = CONV_EOL_RNDTRP_WARN;
 
 	if (!DIFF_FILE_VALID(s))
-		die("internal error: asking to populate invalid file.");
+		die(_("internal error: asking to populate invalid file."));
 	if (S_ISDIR(s->mode))
 		return -1;
 
@@ -4252,7 +4252,7 @@ object_read:
 			info.contentp = &s->data;
 			if (oid_object_info_extended(r, &s->oid, &info,
 						     OBJECT_INFO_LOOKUP_REPLACE))
-				die("unable to read %s", oid_to_hex(&s->oid));
+				die(_("unable to read %s"), oid_to_hex(&s->oid));
 		}
 		s->should_free = 1;
 	}
@@ -4368,7 +4368,7 @@ static struct diff_tempfile *prepare_temp_file(struct repository *r,
 	}
 	else {
 		if (diff_populate_filespec(r, one, NULL))
-			die("cannot read data blob for %s", one->path);
+			die(_("cannot read data blob for %s"), one->path);
 		prep_temp_blob(r->index, one->path, temp,
 			       one->data, one->size,
 			       &one->oid, one->mode);
@@ -4464,7 +4464,7 @@ static const char *diff_abbrev_oid(const struct object_id *oid, int abbrev)
 		if (abbrev < 0)
 			abbrev = FALLBACK_DEFAULT_ABBREV;
 		if (abbrev > the_hash_algo->hexsz)
-			BUG("oid abbreviation out of range: %d", abbrev);
+			BUG(_("oid abbreviation out of range: %d"), abbrev);
 		if (abbrev)
 			hex[abbrev] = '\0';
 		return hex;

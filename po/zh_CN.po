@@ -19875,6 +19875,36 @@ msgstr ""
 "发现配置变量 'diff.dirstat' 中的错误：\n"
 "%s"
 
+#: diff.c:2615
+#, c-format
+msgid " %d file changed"
+msgstr "%d 更改的文件"
+
+#: diff.c:2615
+#, c-format
+msgid " %d files changed"
+msgstr "%d 更改的文件"
+
+#: diff.c:2628
+#, c-format
+msgid ", %d insertion(+)"
+msgstr "，%d 添加(+)"
+
+# diff.c:2628
+# c-format
+msgid ", %d insertions(+)"
+msgstr "，%d 添加(+)"
+
+#: diff.c:2634
+#, c-format
+msgid ", %d deletion(-)"
+msgstr "，%d 删除(-)"
+
+#: diff.c:2634
+#, c-format
+msgid ", %d deletions(-)"
+msgstr "，%d 删除(-)"
+
 #: diff.c
 #, c-format
 msgid "external diff died, stopping at %s"
