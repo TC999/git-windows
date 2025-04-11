@@ -1,6 +1,6 @@
 name: git-l10n
 
-on: [push, pull_request_target]
+on: [push, pull_request_target, workflow_dispatch]
 
 # Avoid unnecessary builds. Unlike the main CI jobs, these are not
 # ci-configurable (but could be).
@@ -10,10 +10,6 @@ concurrency:
 
 jobs:
   git-po-helper:
-    if: >-
-      endsWith(github.repository, '/git-po') ||
-      contains(github.head_ref, 'l10n') ||
-      contains(github.ref, 'l10n')
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
