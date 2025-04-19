@@ -100,7 +100,7 @@ static int launch_specified_editor(const char *editor, const char *path,
 			if (save_and_restore_term)
 				restore_term();
 			strbuf_release(&realpath);
-			return error("unable to start editor '%s'", editor);
+			return error(_("unable to start editor '%s'"), editor);
 		}
 
 		sigchain_push(SIGINT, SIG_IGN);
@@ -121,14 +121,14 @@ static int launch_specified_editor(const char *editor, const char *path,
 			 */
 			term_clear_line();
 		if (ret)
-			return error("there was a problem with the editor '%s'",
+			return error(_("there was a problem with the editor '%s'"),
 					editor);
 	}
 
 	if (!buffer)
 		return 0;
 	if (strbuf_read_file(buffer, path, 0) < 0)
-		return error_errno("could not read file '%s'", path);
+		return error_errno(_("could not read file '%s'"), path);
 	return 0;
 }
 

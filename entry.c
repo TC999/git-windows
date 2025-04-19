@@ -51,7 +51,7 @@ static void create_directories(const char *path, int path_len,
 			if (errno == EEXIST && state->force &&
 			    !unlink_or_warn(buf) && !mkdir(buf, 0777))
 				continue;
-			die_errno("cannot create directory at '%s'", buf);
+			die_errno(_("cannot create directory at '%s'"), buf);
 		}
 	}
 	free(buf);
@@ -64,23 +64,23 @@ static void remove_subtree(struct strbuf *path)
 	int origlen = path->len;
 
 	if (!dir)
-		die_errno("cannot opendir '%s'", path->buf);
+		die_errno(_("cannot opendir '%s'"), path->buf);
 	while ((de = readdir_skip_dot_and_dotdot(dir)) != NULL) {
 		struct stat st;
 
 		strbuf_addch(path, '/');
 		strbuf_addstr(path, de->d_name);
 		if (lstat(path->buf, &st))
-			die_errno("cannot lstat '%s'", path->buf);
+			die_errno(_("cannot lstat '%s'"), path->buf);
 		if (S_ISDIR(st.st_mode))
 			remove_subtree(path);
 		else if (unlink(path->buf))
-			die_errno("cannot unlink '%s'", path->buf);
+			die_errno(_("cannot unlink '%s'"), path->buf);
 		strbuf_setlen(path, origlen);
 	}
 	closedir(dir);
 	if (rmdir(path->buf))
-		die_errno("cannot rmdir '%s'", path->buf);
+		die_errno(_("cannot rmdir '%s'"), path->buf);
 }
 
 static int create_file(const char *path, unsigned int mode)
@@ -259,7 +259,7 @@ int finish_delayed_checkout(struct checkout *state, int show_progress)
 	/* At this point we should not have any delayed paths anymore. */
 	errs |= dco->paths.nr;
 	for_each_string_list_item(path, &dco->paths) {
-		error("'%s' was not filtered properly", path->string);
+		error(_("'%s' was not filtered properly"), path->string);
 	}
 	string_list_clear(&dco->paths, 0);
 
@@ -314,7 +314,7 @@ static int write_entry(struct cache_entry *ce, char *path, struct conv_attrs *ca
 	case S_IFLNK:
 		new_blob = read_blob_entry(ce, &size);
 		if (!new_blob)
-			return error("unable to read sha1 file of %s (%s)",
+			return error(_("unable to read sha1 file of %s (%s)"),
 				     ce->name, oid_to_hex(&ce->oid));
 
 		/*
@@ -327,7 +327,7 @@ static int write_entry(struct cache_entry *ce, char *path, struct conv_attrs *ca
 		ret = create_symlink(state->istate, new_blob, path);
 		free(new_blob);
 		if (ret)
-			return error_errno("unable to create symlink %s", path);
+			return error_errno(_("unable to create symlink %s"), path);
 		break;
 
 	case S_IFREG:
@@ -341,7 +341,7 @@ static int write_entry(struct cache_entry *ce, char *path, struct conv_attrs *ca
 		} else {
 			new_blob = read_blob_entry(ce, &size);
 			if (!new_blob)
-				return error("unable to read sha1 file of %s (%s)",
+				return error(_("unable to read sha1 file of %s (%s)"),
 					     ce->name, oid_to_hex(&ce->oid));
 		}
 
@@ -382,7 +382,7 @@ static int write_entry(struct cache_entry *ce, char *path, struct conv_attrs *ca
 		fd = open_output_fd(path, ce, to_tempfile);
 		if (fd < 0) {
 			free(new_blob);
-			return error_errno("unable to create file %s", path);
+			return error_errno(_("unable to create file %s"), path);
 		}
 
 		wrote = write_in_full(fd, new_blob, size);
@@ -391,14 +391,14 @@ static int write_entry(struct cache_entry *ce, char *path, struct conv_attrs *ca
 		close(fd);
 		free(new_blob);
 		if (wrote < 0)
-			return error("unable to write file %s", path);
+			return error(_("unable to write file %s"), path);
 		break;
 
 	case S_IFGITLINK:
 		if (to_tempfile)
-			return error("cannot create temporary submodule %s", ce->name);
+			return error(_("cannot create temporary submodule %s"), ce->name);
 		if (mkdir(path, 0777) < 0)
-			return error("cannot create submodule directory %s", path);
+			return error(_("cannot create submodule directory %s"), path);
 		sub = submodule_from_ce(ce);
 		if (sub)
 			return submodule_move_head(ce->name, state->super_prefix,
@@ -407,7 +407,7 @@ static int write_entry(struct cache_entry *ce, char *path, struct conv_attrs *ca
 		break;
 
 	default:
-		return error("unknown file mode for %s in index", ce->name);
+		return error(_("unknown file mode for %s in index"), ce->name);
 	}
 
 finish:
@@ -416,7 +416,7 @@ finish:
 
 	if (state->refresh_cache) {
 		if (!fstat_done && lstat(ce->name, &st) < 0)
-			return error_errno("unable to stat just-written file %s",
+			return error_errno(_("unable to stat just-written file %s"),
 					   ce->name);
 		update_ce_after_write(state, ce , &st);
 	}
@@ -496,7 +496,7 @@ int checkout_entry_ca(struct cache_entry *ce, struct conv_attrs *ca,
 			 * No content and thus no path to create, so we have
 			 * no pathname to return.
 			 */
-			BUG("Can't remove entry to a path");
+			BUG(_("Can't remove entry to a path"));
 		unlink_entry(ce, state->super_prefix);
 		return 0;
 	}
@@ -544,7 +544,7 @@ int checkout_entry_ca(struct cache_entry *ce, struct conv_attrs *ca,
 		if (!state->force) {
 			if (!state->quiet)
 				fprintf(stderr,
-					"%s already exists, no checkout\n",
+					_("%s already exists, no checkout\n"),
 					path.buf);
 			return -1;
 		}
@@ -578,7 +578,7 @@ int checkout_entry_ca(struct cache_entry *ce, struct conv_attrs *ca,
 				return 0;
 			remove_subtree(&path);
 		} else if (unlink(path.buf))
-			return error_errno("unable to unlink old '%s'", path.buf);
+			return error_errno(_("unable to unlink old '%s'"), path.buf);
 	} else if (state->not_new)
 		return 0;
 
